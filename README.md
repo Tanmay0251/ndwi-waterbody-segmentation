@@ -91,9 +91,26 @@ Full design — architecture, data flow, algorithm walk-through, UI wireframe �
 
 ## Running the tests
 
+Pytest is already in `requirements.txt`, so once the venv is set up:
+
 ```bash
-pip install pytest
 pytest -q
+```
+
+There are 22 tests covering every module except `io_raster.py` (which just
+wraps rasterio) and `app.py` (UI — tested manually in the browser).
+
+## Running end-to-end from the command line (no UI)
+
+Handy for quickly checking the pipeline against a real GeoTIFF pair:
+
+```bash
+python scripts/run_end_to_end.py \
+    --green data/samples/green.tif \
+    --nir   data/samples/nir.tif \
+    --bandwidth 0.3 \
+    --downsample 4 \
+    --out   data/samples/out_mask.png
 ```
 
 ## License
