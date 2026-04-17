@@ -48,8 +48,8 @@ st.caption(
 # Small helpers
 # =============================================================================
 
-SAMPLE_GREEN = Path("data/samples/green.tif")
-SAMPLE_NIR = Path("data/samples/nir.tif")
+SAMPLE_GREEN = Path("data/samples/sample_green.tif")
+SAMPLE_NIR = Path("data/samples/sample_nir.tif")
 
 
 def _save_upload_to_tempfile(upload) -> str:
@@ -198,15 +198,15 @@ with st.sidebar:
         crop_c2 = st.number_input("Col end", min_value=1, value=256, step=16)
     else:
         downsample_k = st.slider(
-            "Downsample factor (k)", min_value=1, max_value=20, value=4,
-            help="Every k-th pixel is kept. k=4 turns a 1000x1000 image into 250x250.",
+            "Downsample factor (k)", min_value=1, max_value=20, value=6,
+            help="Every k-th pixel is kept. k=6 turns a ~1000x1000 image into ~160x160.",
         )
 
     st.header("3. Mean-Shift")
     kernel = st.radio("Kernel", ["gaussian", "flat"], index=0, horizontal=True)
     bandwidth = st.slider(
         "Bandwidth (in normalised feature space)",
-        min_value=0.05, max_value=1.5, value=0.3, step=0.05,
+        min_value=0.05, max_value=1.5, value=0.5, step=0.05,
         help="Smaller = many tight clusters. Larger = fewer broad clusters.",
     )
     max_iter = st.number_input(

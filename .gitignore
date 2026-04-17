@@ -25,6 +25,10 @@ data/samples/*.tif
 data/samples/*.tiff
 data/samples/*.jp2
 
+# ...except for the bundled Lake Tahoe sample that ships with the repo
+!data/samples/sample_green.tif
+!data/samples/sample_nir.tif
+
 # GEE exports / temp outputs
 *.tif.aux.xml
 outputs/

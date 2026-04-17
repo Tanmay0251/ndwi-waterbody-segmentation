@@ -1,22 +1,25 @@
 # Sample data
 
-Drop your Green-band and NIR-band GeoTIFFs in this folder — the app will
-pick them up when you select **"Use sample scene"** in the sidebar.
-
-Expected filenames:
-
-- `green.tif` — Sentinel-2 Band 3 (Green, 10 m resolution) or equivalent
-- `nir.tif`   — Sentinel-2 Band 8 (NIR, 10 m resolution) or equivalent
-
-Both files must cover the same geographic extent and have the same
-pixel size / CRS.
+This folder holds Green and NIR GeoTIFFs. The app looks for the bundled
+sample first (`sample_green.tif` + `sample_nir.tif`); if those aren't
+present you can always upload your own via the sidebar.
 
 ## Three ways to get sample data
 
-### 1. Use what's bundled
+### 1. Use the bundled sample (easiest)
 
-One or two small crops (about 512 × 512 pixels each) will eventually be
-committed here for out-of-the-box demos. For now this folder is empty.
+The repo ships with a ~11 km × 11 km crop of Sentinel-2 imagery over
+the **west shore of Lake Tahoe, California** (scene date 2025-09-27,
+~0.4% cloud cover). Files:
+
+- `sample_green.tif` — Sentinel-2 Band 3 (Green)
+- `sample_nir.tif`   — Sentinel-2 Band 8 (NIR)
+
+Pulled directly from the public **AWS Open Data** Sentinel-2 COG bucket,
+no authentication needed. When you open `streamlit run app.py` and pick
+**"Use bundled sample"** in the sidebar, this is what loads.
+
+Good starting parameters: bandwidth 0.5, downsample factor 6, min-mean-NDWI 0.0.
 
 ### 2. Google Earth Engine (tutor-recommended)
 
