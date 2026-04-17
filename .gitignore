@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sample data — keep folder but don't commit huge rasters
+data/samples/*.tif
+data/samples/*.tiff
+data/samples/*.jp2
+
+# GEE exports / temp outputs
+*.tif.aux.xml
+outputs/
