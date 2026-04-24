@@ -1,17 +1,14 @@
-# Design Document — NDWI Water-Body Segmentation
+# Project notes — NDWI Water-Body Segmentation
 
-*GNR Semester 8 — Problem Statement #6*
+*GNR Semester 8 — Problem Statement #6:*
 
-> **"Generate an NDWI image and make a 3-band image of Green, NIR, and NDWI
+> *"Generate an NDWI image and make a 3-band image of Green, NIR, and NDWI
 > components. Extract all water bodies from this 3-band image using the
-> Mean-Shift segmentation algorithm."**
+> Mean-Shift segmentation algorithm."*
 
-This document is the full design for the project. It covers the problem,
-the algorithm, the module layout, the data flow, the UI, and the build
-sequence. It is the starting point for anyone on the team who wants to
-understand the code before reading it.
-
----
+These notes walk through the whole project — the problem, the algorithm,
+how the code is laid out, and how data flows through it. A good starting
+point for anyone on the team before opening the source files.
 
 ## 1. Problem statement in plain words
 
@@ -39,10 +36,9 @@ overlay.
 - **No external API at runtime.** The app is fully offline once the
   GeoTIFFs are on disk.
 
-## 3. Implementation stance — what is "ours" vs what is a library
+## 3. What we wrote vs what comes from libraries
 
-The course rubric penalises blind library usage. We therefore draw a
-clear line:
+The course rubric cares about this a lot, so here is the honest split:
 
 | Category | What we do ourselves | What we delegate to libraries |
 |---|---|---|
@@ -241,7 +237,7 @@ def segment(img3, bandwidth, kernel="gaussian", max_iter=100, eps=1e-3):
 Both are tolerable for a UI demo. Sliders don't re-run automatically —
 the user must click **Run Pipeline** to trigger segmentation.
 
-### 6.6 What we won't build (scope discipline)
+### 6.6 What we deliberately skipped
 
 - No GPU acceleration. Pure NumPy is explainable.
 - No adaptive bandwidth. Fixed is easier to defend.
@@ -286,14 +282,14 @@ the user must click **Run Pipeline** to trigger segmentation.
 
 **Tab contents:**
 
-| Tab | Content | Purpose |
+| Tab | What it shows | Why |
 |---|---|---|
-| Input | Side-by-side preview of Green and NIR bands, dimension info, red ROI rectangle if applicable | Verify the files loaded correctly |
-| NDWI | NDWI array rendered with `RdBu` colormap + colorbar | Shows what Mean-Shift will cluster on |
-| Segmentation | Label map with random colour per cluster + cluster count | "Wow" slide for the presentation |
-| Water Mask | Binary mask AND semi-transparent cyan overlay on Green | Final deliverable |
-| Stats | Table: id, area_px, area_km2 per blob; totals | Numbers for the report |
-| Download | "Download PNG" + "Download GeoTIFF" buttons | Exported result for use in QGIS |
+| Input | Green and NIR bands side by side, with dimensions | Check the files loaded correctly |
+| NDWI | NDWI array with a blue-red colormap + colorbar | See what Mean-Shift is going to cluster on |
+| Segmentation | Label map with a random colour per cluster | See how the clustering actually split things |
+| Water Mask | Binary mask + semi-transparent cyan overlay on Green | The final answer, easy to eyeball |
+| Stats | Table of per-blob id, pixel area, km² | Numbers to quote in the report |
+| Download | "Download PNG" + "Download GeoTIFF" buttons | Save the mask to open in QGIS later |
 
 ### 7.1 Streamlit-specific details
 
@@ -352,44 +348,34 @@ tests, no pytest plugins:
 No tests for `io_raster.py` (we trust rasterio) or `app.py` (UI — tested
 manually).
 
-## 10. Build sequence
+## 10. Build order
 
-Implement in this order. Each step is testable in isolation before the
-next begins. Nothing depends on anything not yet built.
+Built in this order so each step is usable and testable before moving on:
 
-1. **Skeleton** — folders, `requirements.txt`, placeholder modules,
-   stub README. *(done)*
-2. **`ndwi.py`** — simplest OURS module. Write + test. ~20 min.
-3. **`io_raster.py`** — rasterio wrapper. Verify on a real GeoTIFF. ~20 min.
-4. **`mean_shift.py`** — the big one. Write + test on synthetic 2-blob
-   data. ~90–120 min.
-5. **`water_select.py`** — write + test. ~15 min.
-6. **`postprocess.py`** — write + test. ~15 min.
-7. **End-to-end smoke script** — `scripts/run_end_to_end.py` loads a
-   sample, runs all five steps, saves a PNG. No UI. ~30 min.
-8. **`app.py`** — Streamlit UI, built tab by tab. Each tab verified in
-   the browser before moving to the next. ~2 hours.
-9. **`fetch_from_gee.py`** — optional GEE helper. ~30 min.
-10. **README polish, default-param tuning, presentation-ready sample
-    data** — final polish.
-
-Rough total: **~7–8 hours of focused build time.**
+1. Skeleton — folders, `requirements.txt`, placeholder modules, README stub.
+2. `ndwi.py` — simplest ours module.
+3. `io_raster.py` — rasterio wrapper.
+4. `mean_shift.py` — the big one.
+5. `water_select.py`.
+6. `postprocess.py`.
+7. End-to-end smoke script (`scripts/run_end_to_end.py`) — runs all five
+   steps on a real GeoTIFF without the UI.
+8. `app.py` — Streamlit UI, built tab by tab.
+9. `fetch_from_gee.py` — optional GEE helper.
+10. Bundled sample + default-parameter tuning.
 
 ## 11. Data sources
 
-Tutor guidance: *"use Google Earth Engine, direct satellite downloads,
-or any other open source."* We document three paths:
+The tutor said we can use Google Earth Engine, direct satellite downloads,
+or any open source. We have three paths:
 
-1. **Ready-to-use samples** — 1–2 small Sentinel-2 crops committed in
-   `data/samples/` so the demo works out of the box.
-2. **Google Earth Engine** — `scripts/fetch_from_gee.py`. Requires a
-   one-time `earthengine authenticate` browser flow. Tutor-approved.
+1. **Bundled sample** — a small Sentinel-2 crop of Lake Tahoe committed
+   in `data/samples/` so the demo works out of the box.
+2. **Google Earth Engine** — `scripts/fetch_from_gee.py` for pulling
+   fresh data for any location (needs a one-time `earthengine authenticate`).
 3. **Manual download** — Copernicus Browser or USGS Earth Explorer.
 
-GEE is used **only** for data acquisition. The NDWI / Mean-Shift logic
-stays on our machine — offloading computation to GEE's built-in tools
-would defeat the rubric.
+GEE is only used to fetch files. The NDWI and Mean-Shift computation
+always runs on our machine — otherwise we would not really be writing
+the algorithm ourselves.
 
----
-
-*End of design document. See the module files for implementation.*

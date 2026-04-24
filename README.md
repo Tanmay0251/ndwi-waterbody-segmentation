@@ -106,13 +106,9 @@ Handy for quickly checking the pipeline against a real GeoTIFF pair:
 
 ```bash
 python scripts/run_end_to_end.py \
-    --green data/samples/green.tif \
-    --nir   data/samples/nir.tif \
-    --bandwidth 0.3 \
-    --downsample 4 \
-    --out   data/samples/out_mask.png
+    --green data/samples/sample_green.tif \
+    --nir   data/samples/sample_nir.tif \
+    --bandwidth 0.5 \
+    --downsample 6 \
+    --out   out_mask.png
 ```
-
-## License
-
-Course project, no license. Please don't copy for your own submission.

@@ -34,9 +34,7 @@ from waterbody.water_select import pick_water
 from waterbody.postprocess import clean
 
 
-# =============================================================================
-# Page config and title
-# =============================================================================
+# --- page setup ---
 st.set_page_config(page_title="NDWI Water-Body Segmentation", layout="wide")
 st.title("NDWI Water-Body Segmentation")
 st.caption(
@@ -44,9 +42,7 @@ st.caption(
 )
 
 
-# =============================================================================
-# Small helpers
-# =============================================================================
+# --- small helpers ---
 
 SAMPLE_GREEN = Path("data/samples/sample_green.tif")
 SAMPLE_NIR = Path("data/samples/sample_nir.tif")
@@ -157,9 +153,7 @@ def _render_overlay(green_arr: np.ndarray, mask: np.ndarray):
     return fig
 
 
-# =============================================================================
-# Sidebar — all controls live here
-# =============================================================================
+# --- sidebar with all the controls ---
 
 with st.sidebar:
     st.header("1. Input")
@@ -225,9 +219,7 @@ with st.sidebar:
     run_clicked = st.button("Run Pipeline", type="primary", use_container_width=True)
 
 
-# =============================================================================
-# Resolve the input source into two filesystem paths
-# =============================================================================
+# --- figure out which files to load ---
 
 green_path = nir_path = None
 if source == "Use bundled sample" and have_sample:
@@ -238,9 +230,7 @@ elif source == "Upload your own" and upload_green is not None and upload_nir is 
     nir_path = _save_upload_to_tempfile(upload_nir)
 
 
-# =============================================================================
-# Load rasters if we have paths
-# =============================================================================
+# --- load the rasters (if we have paths) ---
 
 full_green = full_nir = None
 meta = None
@@ -253,9 +243,7 @@ if green_path and nir_path:
         load_error = str(exc)
 
 
-# =============================================================================
-# Run the pipeline on demand and cache the result in session_state
-# =============================================================================
+# --- run the pipeline when the user clicks the button ---
 
 if "result" not in st.session_state:
     st.session_state["result"] = None
@@ -320,9 +308,7 @@ if run_clicked:
         )
 
 
-# =============================================================================
-# Tabs — show results
-# =============================================================================
+# --- the tabs that show results ---
 
 tab_input, tab_ndwi, tab_seg, tab_mask, tab_stats, tab_dl = st.tabs(
     ["Input", "NDWI", "Segmentation", "Water Mask", "Stats", "Download"]
