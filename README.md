@@ -1,9 +1,12 @@
 # NDWI Water-Body Segmentation
 
-Extract water bodies from satellite imagery using the **Normalized Difference Water Index (NDWI)** and **Mean-Shift segmentation**.
+Extract water bodies from satellite imagery using the **Normalized Difference
+Water Index (NDWI)** and **Mean-Shift segmentation**.
 
-> GNR Semester 8 course project.
-> Problem statement #6 — *"Generate an NDWI image and make a 3-band image of Green, NIR, and NDWI components. Extract all water bodies from this 3-band image using the Mean-Shift segmentation algorithm."*
+> GNR Semester 8 — Problem Statement #6:
+> *"Generate an NDWI image and make a 3-band image of Green, NIR, and NDWI
+> components. Extract all water bodies from this 3-band image using the
+> Mean-Shift segmentation algorithm."*
 
 ## Team
 
@@ -11,104 +14,85 @@ Extract water bodies from satellite imagery using the **Normalized Difference Wa
 - Rohan
 - Pravesh Khaparde
 
-## What this project does (in one paragraph)
+## What the code does
 
-Given two single-band GeoTIFFs — one for the Green band and one for the Near-Infrared (NIR) band — the tool:
+Given a Green-band and a NIR-band GeoTIFF of the same scene, the pipeline:
 
-1. Computes NDWI at every pixel: `NDWI = (Green − NIR) / (Green + NIR)`
-2. Stacks Green, NIR, and NDWI into one 3-band image — each pixel becomes a point in a 3-D feature space.
-3. Runs a from-scratch Mean-Shift segmentation on those points, clustering spectrally-similar pixels together.
+1. Computes NDWI at every pixel: `NDWI = (Green − NIR) / (Green + NIR)`.
+2. Stacks Green, NIR and NDWI into one 3-band image — every pixel is a
+   point in 3-D feature space.
+3. Runs **Mean-Shift** (written from scratch) on those points, grouping
+   spectrally-similar pixels into clusters.
 4. Picks the cluster(s) whose mean NDWI is above a threshold — those are water.
-5. Cleans up the mask by removing tiny blobs and exports the result as a PNG and a georeferenced GeoTIFF.
+5. Drops tiny spurious blobs and reports each surviving blob's area in km².
 
-A Streamlit UI wraps the whole pipeline so a user can upload their own data, tweak parameters with sliders, and see results instantly.
+A Streamlit UI wraps the whole pipeline so you can pick a bundled scene,
+tweak the parameters, and see the result.
 
-## What's ours vs what's a library (important for the viva)
+## What we wrote vs what comes from libraries
 
-| Module | Status | Uses |
+| File / function | Ours? | Library used |
 |---|---|---|
-| `waterbody/ndwi.py` | **Ours** (NumPy math) | `numpy` |
-| `waterbody/mean_shift.py` | **Ours** — the core algorithm | `numpy`, `scipy.spatial.cKDTree` (neighbour-search data structure) |
-| `waterbody/water_select.py` | **Ours** (label-based cluster selection) | `numpy` |
-| `waterbody/postprocess.py` | **Ours** (blob-area filtering) | `numpy`, `scipy.ndimage.label` (standard connected-components) |
-| `waterbody/io_raster.py` | Plumbing | `rasterio` (GeoTIFF reader/writer) |
-| `app.py` | Plumbing | `streamlit` (UI), `matplotlib`, `PIL` |
-| `scripts/fetch_from_gee.py` | Plumbing (optional) | `earthengine-api` |
+| `compute_ndwi`, `stack_bands` | yes | `numpy` |
+| `segment` (Mean-Shift) | **yes — the star** | `numpy`, `scipy.spatial.cKDTree` (fast neighbour lookup) |
+| `pick_water` | yes | `numpy` |
+| `clean` | yes | `numpy`, `scipy.ndimage.label` (connected components) |
+| `load_bands` | plumbing | `rasterio` |
+| `app.py` | plumbing | `streamlit`, `matplotlib` |
 
-The rubric asks us to distinguish our implementation from external packages — this table is the answer. No `sklearn.cluster.MeanShift`, no `cv2.pyrMeanShiftFiltering`.
+We deliberately do **not** call `sklearn.cluster.MeanShift` or
+`cv2.pyrMeanShiftFiltering` — those would skip the interesting part.
 
 ## Quick start
 
 ```bash
-# 1. Create and activate a virtual environment
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS / Linux
+venv\Scripts\activate            # Windows
+# source venv/bin/activate       # macOS / Linux
 
-# 2. Install dependencies
 pip install -r requirements.txt
-
-# 3. Put a pair of Green + NIR GeoTIFFs in data/samples/
-#    (see data/samples/README.md for how to obtain them)
-
-# 4. Launch the UI
 streamlit run app.py
 ```
 
-The app opens in your browser at `http://localhost:8501`. Upload the two GeoTIFFs in the sidebar, tweak the bandwidth slider, and click **Run Pipeline**.
-
-## Data sources
-
-Three documented paths to obtain Green + NIR bands (see `data/samples/README.md` for details):
-
-1. **Bundled sample** — a small Sentinel-2 crop included in `data/samples/`. Works out of the box.
-2. **Google Earth Engine** — run `python scripts/fetch_from_gee.py` for fresh data anywhere in the world (one-time `earthengine authenticate` setup).
-3. **Manual download** — Copernicus Browser or USGS Earth Explorer.
+The app opens at `http://localhost:8501`. Pick a scene from the dropdown,
+tweak the bandwidth slider, click **Run**.
 
 ## Project layout
 
 ```
 .
-├── app.py                  # Streamlit UI entry point
-├── waterbody/              # core package (our implementation)
-│   ├── io_raster.py        # Load GeoTIFFs (rasterio plumbing)
-│   ├── ndwi.py             # NDWI formula + 3-band stacking
-│   ├── mean_shift.py       # Mean-Shift from scratch — the heart
-│   ├── water_select.py     # Pick which cluster(s) are water
-│   └── postprocess.py      # Blob cleanup
-├── scripts/
-│   └── fetch_from_gee.py   # Optional GEE data helper
-├── tests/                  # Pytest sanity tests
-├── docs/
-│   └── design.md           # Full design document
-├── data/samples/           # Sample GeoTIFFs (not committed — see README)
+├── app.py                # Streamlit UI
+├── waterbody.py          # Core functions (NDWI, Mean-Shift, water selection, cleanup)
+├── test_waterbody.py     # pytest sanity tests
+├── data/samples/         # Bundled Green + NIR pairs from Sentinel-2
 └── requirements.txt
 ```
 
-## Design document
+Three Python files, no sub-packages. Each file has one clear job.
 
-Full design — architecture, data flow, algorithm walk-through, UI wireframe — is in [`docs/design.md`](docs/design.md). Start there if you want the complete picture before reading code.
+## Bundled sample scenes
+
+`data/samples/` ships with ~10 Sentinel-2 crops covering different kinds of
+water bodies (mountain lake, river delta, coastline, reservoir, etc.) so the
+UI works out of the box without any data-hunting. All pulled from AWS's public
+Sentinel-2 COG bucket — no auth needed to regenerate.
+
+Filename pattern: `<place>_green.tif` and `<place>_nir.tif`. Drop your own
+pair in using the same pattern and it'll show up in the dropdown.
 
 ## Running the tests
-
-Pytest is already in `requirements.txt`, so once the venv is set up:
 
 ```bash
 pytest -q
 ```
 
-There are 22 tests covering every module except `io_raster.py` (which just
-wraps rasterio) and `app.py` (UI — tested manually in the browser).
+## Documentation for teammates
 
-## Running end-to-end from the command line (no UI)
+The `docs/` folder has a longer write-up of the project and a slide deck:
 
-Handy for quickly checking the pipeline against a real GeoTIFF pair:
-
-```bash
-python scripts/run_end_to_end.py \
-    --green data/samples/sample_green.tif \
-    --nir   data/samples/sample_nir.tif \
-    --bandwidth 0.5 \
-    --downsample 6 \
-    --out   out_mask.png
-```
+- `docs/project_overview.pdf` — full explanation of NDWI, Mean-Shift, the
+  pipeline, hyperparameters, UI, and data sources. ~12 pages.
+- `docs/project_presentation.pptx` — a 10-slide deck for the class presentation.
+- `docs/project_overview.md` — the markdown source the PDF is built from.
+- `docs/make_figures.py`, `docs/make_pdf.py`, `docs/make_pptx.py` — scripts that
+  regenerate the figures, PDF, and slides if any of the content changes.

@@ -10,25 +10,18 @@ venv/
 .venv/
 env/
 
-# IDE / editor
+# IDE / OS
 .vscode/
 .idea/
 *.swp
 .DS_Store
 Thumbs.db
 
-# Streamlit
+# Streamlit secrets
 .streamlit/secrets.toml
 
-# Sample data — keep folder but don't commit huge rasters
-data/samples/*.tif
+# Big raster formats we don't want to accidentally commit
 data/samples/*.tiff
 data/samples/*.jp2
-
-# ...except for the bundled Lake Tahoe sample that ships with the repo
-!data/samples/sample_green.tif
-!data/samples/sample_nir.tif
-
-# GEE exports / temp outputs
 *.tif.aux.xml
 outputs/
