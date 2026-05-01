@@ -1,20 +1,11 @@
-# Core numerics — used everywhere
+# Numerics
 numpy>=1.26
 scipy>=1.12
 
-# Raster I/O — reads and writes GeoTIFFs
+# GeoTIFF I/O
 rasterio>=1.3
 
-# UI
+# UI + plots
 streamlit>=1.30
-
-# Visualisation / image export
 matplotlib>=3.8
 pillow>=10.0
-
-# Testing
-pytest>=8.0
-
-# Optional: only needed to run scripts/fetch_from_gee.py.
-# Safe to skip if you already have GeoTIFFs to upload.
-earthengine-api>=0.1.400

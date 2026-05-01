@@ -1,13 +1,21 @@
-"""NDWI water-body segmentation — core functions.
+"""All the algorithm code for the project lives here.
 
-Only `segment` is the algorithm we defend in the viva (written from scratch).
-Everything else is small glue code.
+Six small functions:
+    load_bands      read Green + NIR GeoTIFFs (rasterio plumbing)
+    compute_ndwi    NDWI = (Green - NIR) / (Green + NIR), per pixel
+    stack_bands     turn three (H, W) arrays into one (H, W, 3) image
+    segment         Mean-Shift clustering written from scratch
+    pick_water      pick clusters whose mean NDWI is above a threshold
+    clean           drop tiny noisy blobs and return per-blob area in km^2
+
+Only `segment` is the algorithm we defend in the viva. Everything else
+is short glue code around it.
 """
 
 import numpy as np
 import rasterio
-from scipy.spatial import cKDTree
-from scipy.ndimage import label
+from scipy.spatial import cKDTree   # fast neighbour lookup, used inside segment()
+from scipy.ndimage import label      # connected-component labelling, used inside clean()
 
 
 def load_bands(green_path, nir_path):

@@ -1,6 +1,14 @@
 """Streamlit UI for NDWI water-body segmentation.
 
-Run:  streamlit run app.py
+Run:  streamlit run app.py    (or just double-click run.bat)
+
+Layout:
+  Sidebar  — scene dropdown + four parameter widgets + Run button
+  Main     — five tabs (Input, NDWI, Segmentation, Water mask, Stats)
+
+This file does no algorithmic work: every computation is delegated to
+the functions in waterbody.py. The UI just calls them and displays
+whatever they return.
 """
 
 from pathlib import Path

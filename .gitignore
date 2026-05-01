@@ -25,3 +25,6 @@ data/samples/*.tiff
 data/samples/*.jp2
 *.tif.aux.xml
 outputs/
+
+# Submission bundle — built by us, never tracked
+tanmay.zip
